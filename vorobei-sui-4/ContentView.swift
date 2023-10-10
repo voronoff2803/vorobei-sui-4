@@ -10,8 +10,7 @@ import Combine
 
 struct ContentView: View {
     @ObservedObject var viewModel = ViewModel()
-    @State private var animation: CGFloat = 0.0
-    let animationDuration: Double = 0.5
+    
     
     var body: some View {
         ZStack {
@@ -21,12 +20,11 @@ struct ContentView: View {
                 .opacity(viewModel.throttledValue ? 1.0 : 0.0)
             
             Button(action: {}, label: {
-                ArrowIndicator(animation: animation)
-                    .onTapGesture(perform: performAnimation)
+                ArrowIndicator(animation: self.viewModel.animation)
             })
             .buttonStyle(SimpleButtonStyle())
             .offset(CGSize(width: -10.0, height: 0))
-            .allowsHitTesting(animation == 0.0)
+            .allowsHitTesting(self.viewModel.animation == 0.0)
             .scaleEffect(CGSize(width: viewModel.throttledValue ? 0.86 : 1.0,
                                 height: viewModel.throttledValue ? 0.86 : 1.0))
             .simultaneousGesture(
@@ -35,19 +33,10 @@ struct ContentView: View {
                         self.viewModel.value = true
                     })
                     .onEnded({ _ in
+                        self.viewModel.performTapAnimation()
                         self.viewModel.value = false
                     })
             )
-        }
-    }
-    
-    private func performAnimation() {
-        withAnimation(.interpolatingSpring(stiffness: 300, damping: 15)) {
-            animation = 1.0
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-            animation = 0.0
         }
     }
 }
@@ -87,6 +76,9 @@ struct SimpleButtonStyle: ButtonStyle {
 class ViewModel: ObservableObject {
     @Published var value: Bool = false
     @Published var throttledValue: Bool = false
+    @Published var animation: CGFloat = 0.0
+    
+    let animationDuration: Double = 0.5
     
     private var throttleCancellable: AnyCancellable? = nil
     
@@ -98,6 +90,18 @@ class ViewModel: ObservableObject {
                     self?.throttledValue = val
                 }
             }
+    }
+    
+    func performTapAnimation() {
+        guard animation == 0.0 else { return }
+        
+        withAnimation(.interpolatingSpring(stiffness: 300, damping: 15)) {
+            self.animation = 1.0
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+            self.animation = 0.0
+        }
     }
 }
 
