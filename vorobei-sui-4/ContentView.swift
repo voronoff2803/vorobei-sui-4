@@ -17,7 +17,7 @@ struct ContentView: View {
             Button(action: { self.performTapAnimation() }, label: {
                 ArrowIndicator(animation: animation)
             })
-            .buttonStyle(SimpleButtonStyle(action: {self.performTapAnimation()}))
+            .buttonStyle(SimpleButtonStyle())
         }
     }
     
@@ -63,8 +63,6 @@ struct ArrowIndicator: View {
 struct SimpleButtonStyle: ButtonStyle {
     @ObservedObject var viewModel = ViewModel()
     
-    let action: () -> ()
-    
     func makeBody(configuration: Configuration) -> some View {
         ZStack {
             Circle()
@@ -73,14 +71,13 @@ struct SimpleButtonStyle: ButtonStyle {
                 .opacity(viewModel.throttledValue ? 1.0 : 0.0)
             
             
+            
             configuration.label
                 .offset(CGSize(width: -10.0, height: 0))
                 .allowsHitTesting(self.viewModel.animation == 0.0)
                 .scaleEffect(CGSize(width: viewModel.throttledValue ? 0.86 : 1.0,
                                     height: viewModel.throttledValue ? 0.86 : 1.0))
         }
-        
-        
         .onChange(of: configuration.isPressed) { _, newValue in
             self.viewModel.value = newValue
         }
