@@ -74,7 +74,6 @@ struct SimpleButtonStyle: ButtonStyle {
             
             configuration.label
                 .offset(CGSize(width: -10.0, height: 0))
-                .allowsHitTesting(self.viewModel.animation == 0.0)
                 .scaleEffect(CGSize(width: viewModel.throttledValue ? 0.86 : 1.0,
                                     height: viewModel.throttledValue ? 0.86 : 1.0))
         }
